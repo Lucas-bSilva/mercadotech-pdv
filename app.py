@@ -325,6 +325,7 @@ class App(ctk.CTk):
         except Exception as exc:
             messagebox.showerror("Erro", str(exc))
 
+    
     # Carrega os dados de um produto pelo ID informado.
     def _carregar_produto(self):
         try:
@@ -334,6 +335,9 @@ class App(ctk.CTk):
             if not produto:
                 messagebox.showerror("Erro", "Produto nao encontrado.")
                 return
+
+            self.p_id.delete(0, "end")
+            self.p_id.insert(0, str(produto["id"]))
 
             self.p_nome.delete(0, "end")
             self.p_nome.insert(0, produto["nome"])
@@ -545,6 +549,7 @@ class App(ctk.CTk):
             messagebox.showerror("Erro", str(exc))
 
     # Carrega os dados de um cliente pelo ID informado.
+        
     def _carregar_cliente(self):
         try:
             cliente_id = int(self.c_id.get().strip())
@@ -553,6 +558,9 @@ class App(ctk.CTk):
             if not cliente:
                 messagebox.showerror("Erro", "Cliente nao encontrado.")
                 return
+
+            self.c_id.delete(0, "end")
+            self.c_id.insert(0, str(cliente["id"]))
 
             self.c_nome.delete(0, "end")
             self.c_nome.insert(0, cliente["nome"])
