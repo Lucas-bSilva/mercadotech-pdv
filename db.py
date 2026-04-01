@@ -8,6 +8,7 @@ from typing import Iterator
 from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 
+# Abre uma conexao com o banco e controla commit ou rollback.
 @contextmanager
 def conectar(database: str | None = DB_NAME) -> Iterator[MySQLConnection]:
     conn = mysql.connector.connect(
@@ -28,11 +29,13 @@ def conectar(database: str | None = DB_NAME) -> Iterator[MySQLConnection]:
         conn.close()
 
 
+# Converte todos os resultados do cursor em lista de dicionarios.
 def fetchall_dict(cur):
     cols = [c[0] for c in cur.description]
     return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 
+# Converte um unico resultado do cursor em dicionario.
 def fetchone_dict(cur):
     row = cur.fetchone()
     if not row:

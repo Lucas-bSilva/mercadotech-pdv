@@ -1,4 +1,4 @@
-# Configuração de conexão com o MySQL.
+# Define os parametros de conexao com o banco de dados MySQL.
 
 DB_HOST = "localhost"
 DB_PORT = 3306

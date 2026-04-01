@@ -8,6 +8,7 @@ from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD
 SCHEMA_FILE = Path(__file__).with_name("schema.sql")
 
 
+# Executa o arquivo schema.sql no servidor MySQL.
 def executar_schema():
     sql = SCHEMA_FILE.read_text(encoding="utf-8")
 
@@ -57,6 +58,7 @@ def executar_schema():
     conn.close()
 
 
+# Inicializa o banco de dados a partir do schema.
 if __name__ == "__main__":
     executar_schema()
     print("Banco, tabelas, view e procedure criados com sucesso.")

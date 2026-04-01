@@ -1,6 +1,6 @@
--- Schema do sistema de vendas MercadoTech PDV (Parte 2)
+-- Schema do sistema de vendas MercadoTech PDV
 
--- Remove o banco existente para recriação completa
+-- Remove o banco existente para recriacao completa
 DROP DATABASE IF EXISTS mercadotech_db;
 
 -- Cria o banco de dados com suporte a UTF-8
@@ -11,7 +11,7 @@ DEFAULT COLLATE utf8mb4_unicode_ci;
 -- Seleciona o banco para uso
 USE mercadotech_db;
 
--- Tabela de usuários do sistema (administradores e vendedores)
+-- Tabela de usuarios do sistema
 CREATE TABLE usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   usuario VARCHAR(60) NOT NULL UNIQUE,
@@ -35,7 +35,7 @@ CREATE TABLE clientes (
   INDEX idx_clientes_nome (nome)
 ) ENGINE=InnoDB;
 
--- Tabela de produtos disponíveis para venda
+-- Tabela de produtos disponiveis para venda
 CREATE TABLE produtos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(140) NOT NULL UNIQUE,
@@ -77,7 +77,7 @@ CREATE TABLE vendas (
   INDEX idx_vendas_cliente (cliente_id)
 ) ENGINE=InnoDB;
 
--- Tabela de itens que compõem cada venda
+-- Tabela de itens que compoem cada venda
 CREATE TABLE venda_itens (
   id INT AUTO_INCREMENT PRIMARY KEY,
   venda_id INT NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE venda_itens (
   INDEX idx_itens_prod (produto_id)
 ) ENGINE=InnoDB;
 
--- Remove a view existente para recriação
+-- Remove a view existente para recriacao
 DROP VIEW IF EXISTS vw_estoque_baixo;
 
 -- View que lista produtos com estoque inferior a 5 unidades
@@ -113,13 +113,13 @@ FROM produtos
 WHERE quantidade < 5
 ORDER BY quantidade ASC, nome ASC;
 
--- Remove a procedure existente para recriação
+-- Remove a procedure existente para recriacao
 DROP PROCEDURE IF EXISTS sp_relatorio_vendas_vendedor;
 
--- Define delimitador para criação de procedure
+-- Define delimitador para criacao da procedure
 DELIMITER $$
 
--- Procedure que gera relatório mensal de vendas por vendedor
+-- Procedure que gera relatorio mensal de vendas por vendedor
 CREATE PROCEDURE sp_relatorio_vendas_vendedor(
   IN p_ano INT,
   IN p_mes INT
@@ -142,9 +142,15 @@ BEGIN
   ORDER BY total DESC, vendedor_nome ASC;
 END$$
 
--- Restaura delimitador padrão
+-- Restaura o delimitador padrao
 DELIMITER ;
 
--- Insere usuário administrador padrão no sistema
+-- Insere usuario administrador padrao no sistema
 INSERT INTO usuarios (usuario, senha, nome, perfil)
 VALUES ('admin', '1234', 'Administrador', 'ADMIN');
+
+-- Insere usuarios vendedores para teste e apresentacao
+INSERT INTO usuarios (usuario, senha, nome, perfil)
+VALUES
+  ('vendedor1', '1234', 'Vendedor 1', 'VENDEDOR'),
+  ('vendedor2', '1234', 'Vendedor 2', 'VENDEDOR');

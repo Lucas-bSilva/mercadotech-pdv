@@ -10,12 +10,14 @@ FORMAS_PAGAMENTO_VALIDAS = {"cartao", "boleto", "pix", "berries"}
 STATUS_PAGAMENTO_VALIDOS = {"pendente", "confirmado", "cancelado"}
 
 
+# Representa um item temporario do carrinho de compras.
 @dataclass
 class ItemCarrinho:
     produto_id: int
     quantidade: int
 
 
+# Valida o usuario informado na tela de login.
 def autenticar(usuario: str, senha: str) -> Optional[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -26,7 +28,7 @@ def autenticar(usuario: str, senha: str) -> Optional[dict]:
         return fetchone_dict(cur)
 
 
-# ----------------- PRODUTOS -----------------
+# Retorna a lista de produtos conforme os filtros informados.
 def listar_produtos(filtros: dict | None = None) -> list[dict]:
     filtros = filtros or {}
     where = []
@@ -68,12 +70,15 @@ def listar_produtos(filtros: dict | None = None) -> list[dict]:
         return fetchall_dict(cur)
 
 
+# Insere um novo produto no banco de dados.
 def criar_produto(dados: dict) -> int:
     with conectar() as conn:
         cur = conn.cursor()
         cur.execute(
             """
-            INSERT INTO produtos (nome, categoria, preco, quantidade, codigo_barras, fabricado_em_mari, data_cadastro)
+            INSERT INTO produtos (
+                nome, categoria, preco, quantidade, codigo_barras, fabricado_em_mari, data_cadastro
+            )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
             (
@@ -89,14 +94,21 @@ def criar_produto(dados: dict) -> int:
         return int(cur.lastrowid)
 
 
+# Atualiza um produto existente pelo identificador informado.
 def atualizar_produto(produto_id: int, dados: dict) -> None:
     with conectar() as conn:
         cur = conn.cursor()
         cur.execute(
             """
             UPDATE produtos
-            SET nome=%s, categoria=%s, preco=%s, quantidade=%s, codigo_barras=%s, fabricado_em_mari=%s, data_cadastro=%s
-            WHERE id=%s
+               SET nome=%s,
+                   categoria=%s,
+                   preco=%s,
+                   quantidade=%s,
+                   codigo_barras=%s,
+                   fabricado_em_mari=%s,
+                   data_cadastro=%s
+             WHERE id=%s
             """,
             (
                 dados["nome"],
@@ -111,18 +123,23 @@ def atualizar_produto(produto_id: int, dados: dict) -> None:
         )
 
         if cur.rowcount == 0:
-            raise ValueError("Produto não encontrado.")
+            raise ValueError("Produto nao encontrado.")
 
 
+# Remove um produto pelo identificador informado.
 def remover_produto(produto_id: int) -> None:
     with conectar() as conn:
         cur = conn.cursor()
-        cur.execute("DELETE FROM produtos WHERE id=%s", (produto_id,))
+        try:
+            cur.execute("DELETE FROM produtos WHERE id=%s", (produto_id,))
+        except Exception:
+            raise ValueError("Nao e possivel remover este produto porque ele esta vinculado a uma venda.")
 
         if cur.rowcount == 0:
-            raise ValueError("Produto não encontrado.")
+            raise ValueError("Produto nao encontrado.")
 
 
+# Busca um produto especifico pelo identificador.
 def obter_produto(produto_id: int) -> Optional[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -137,7 +154,7 @@ def obter_produto(produto_id: int) -> Optional[dict]:
         return fetchone_dict(cur)
 
 
-# ----------------- CLIENTES -----------------
+# Retorna a lista de clientes conforme o termo pesquisado.
 def listar_clientes(termo: str | None = None) -> list[dict]:
     sql = """
         SELECT id, nome, cpf, telefone, cidade, torce_flamengo, assiste_one_piece, eh_de_sousa
@@ -157,12 +174,15 @@ def listar_clientes(termo: str | None = None) -> list[dict]:
         return fetchall_dict(cur)
 
 
+# Insere um novo cliente no banco de dados.
 def criar_cliente(dados: dict) -> int:
     with conectar() as conn:
         cur = conn.cursor()
         cur.execute(
             """
-            INSERT INTO clientes (nome, cpf, telefone, cidade, torce_flamengo, assiste_one_piece, eh_de_sousa)
+            INSERT INTO clientes (
+                nome, cpf, telefone, cidade, torce_flamengo, assiste_one_piece, eh_de_sousa
+            )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
             (
@@ -178,14 +198,21 @@ def criar_cliente(dados: dict) -> int:
         return int(cur.lastrowid)
 
 
+# Atualiza um cliente existente pelo identificador informado.
 def atualizar_cliente(cliente_id: int, dados: dict) -> None:
     with conectar() as conn:
         cur = conn.cursor()
         cur.execute(
             """
             UPDATE clientes
-            SET nome=%s, cpf=%s, telefone=%s, cidade=%s, torce_flamengo=%s, assiste_one_piece=%s, eh_de_sousa=%s
-            WHERE id=%s
+               SET nome=%s,
+                   cpf=%s,
+                   telefone=%s,
+                   cidade=%s,
+                   torce_flamengo=%s,
+                   assiste_one_piece=%s,
+                   eh_de_sousa=%s
+             WHERE id=%s
             """,
             (
                 dados["nome"],
@@ -200,18 +227,23 @@ def atualizar_cliente(cliente_id: int, dados: dict) -> None:
         )
 
         if cur.rowcount == 0:
-            raise ValueError("Cliente não encontrado.")
+            raise ValueError("Cliente nao encontrado.")
 
 
+# Remove um cliente pelo identificador informado.
 def remover_cliente(cliente_id: int) -> None:
     with conectar() as conn:
         cur = conn.cursor()
-        cur.execute("DELETE FROM clientes WHERE id=%s", (cliente_id,))
+        try:
+            cur.execute("DELETE FROM clientes WHERE id=%s", (cliente_id,))
+        except Exception:
+            raise ValueError("Nao e possivel remover este cliente porque ele possui vendas registradas.")
 
         if cur.rowcount == 0:
-            raise ValueError("Cliente não encontrado.")
+            raise ValueError("Cliente nao encontrado.")
 
 
+# Busca um cliente especifico pelo identificador.
 def obter_cliente(cliente_id: int) -> Optional[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -226,6 +258,7 @@ def obter_cliente(cliente_id: int) -> Optional[dict]:
         return fetchone_dict(cur)
 
 
+# Busca um cliente especifico pelo CPF.
 def obter_cliente_por_cpf(cpf: str) -> Optional[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -240,6 +273,7 @@ def obter_cliente_por_cpf(cpf: str) -> Optional[dict]:
         return fetchone_dict(cur)
 
 
+# Lista os pedidos ja realizados por um cliente.
 def listar_pedidos_por_cliente(cliente_id: int) -> list[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -264,10 +298,24 @@ def listar_pedidos_por_cliente(cliente_id: int) -> list[dict]:
         return fetchall_dict(cur)
 
 
-# ----------------- VENDAS -----------------
+# Consolida itens repetidos do carrinho pelo produto.
+def consolidar_itens_carrinho(itens: List[ItemCarrinho]) -> List[ItemCarrinho]:
+    acumulado: Dict[int, int] = {}
+
+    for item in itens:
+        if item.quantidade <= 0:
+            raise ValueError("Quantidade invalida.")
+        acumulado[item.produto_id] = acumulado.get(item.produto_id, 0) + item.quantidade
+
+    return [ItemCarrinho(produto_id=pid, quantidade=qtd) for pid, qtd in acumulado.items()]
+
+
+# Calcula o subtotal, desconto e total do carrinho atual.
 def calcular_resumo_carrinho(cliente_id: int | None, itens: List[ItemCarrinho]) -> dict:
     if not itens:
         return {"subtotal": 0.0, "desconto": 0.0, "total": 0.0}
+
+    itens = consolidar_itens_carrinho(itens)
 
     with conectar() as conn:
         cur = conn.cursor()
@@ -276,11 +324,11 @@ def calcular_resumo_carrinho(cliente_id: int | None, itens: List[ItemCarrinho]) 
         for item in itens:
             cur.execute("SELECT preco FROM produtos WHERE id=%s", (item.produto_id,))
             row = cur.fetchone()
+
             if not row:
-                raise ValueError(f"Produto {item.produto_id} não encontrado.")
+                raise ValueError(f"Produto {item.produto_id} nao encontrado.")
+
             preco = float(row[0])
-            if item.quantidade <= 0:
-                raise ValueError("Quantidade inválida.")
             subtotal += preco * item.quantidade
 
         desconto = 0.0
@@ -294,6 +342,7 @@ def calcular_resumo_carrinho(cliente_id: int | None, itens: List[ItemCarrinho]) 
                 (cliente_id,),
             )
             cli = cur.fetchone()
+
             if cli and (int(cli[0]) == 1 or int(cli[1]) == 1 or int(cli[2]) == 1):
                 desconto = round(subtotal * DESCONTO_PCT, 2)
 
@@ -306,15 +355,18 @@ def calcular_resumo_carrinho(cliente_id: int | None, itens: List[ItemCarrinho]) 
         }
 
 
+# Registra uma venda com validacao de estoque e desconto.
 def criar_venda(cliente_id: int, vendedor_id: int, forma: str, status: str, itens: List[ItemCarrinho]) -> int:
     if not itens:
         raise ValueError("Carrinho vazio.")
 
     if forma not in FORMAS_PAGAMENTO_VALIDAS:
-        raise ValueError("Forma de pagamento inválida.")
+        raise ValueError("Forma de pagamento invalida.")
 
     if status not in STATUS_PAGAMENTO_VALIDOS:
-        raise ValueError("Status de pagamento inválido.")
+        raise ValueError("Status de pagamento invalido.")
+
+    itens = consolidar_itens_carrinho(itens)
 
     with conectar() as conn:
         cur = conn.cursor()
@@ -330,26 +382,32 @@ def criar_venda(cliente_id: int, vendedor_id: int, forma: str, status: str, iten
         cli = cur.fetchone()
 
         if not cli:
-            raise ValueError("Cliente não encontrado.")
+            raise ValueError("Cliente nao encontrado.")
+
+        cur.execute("SELECT id, nome FROM usuarios WHERE id=%s", (vendedor_id,))
+        vendedor = cur.fetchone()
+
+        if not vendedor:
+            raise ValueError("Vendedor nao encontrado.")
 
         subtotal = 0.0
         produtos_cache: Dict[int, Tuple[float, int]] = {}
 
         for item in itens:
-            cur.execute("SELECT preco, quantidade FROM produtos WHERE id=%s FOR UPDATE", (item.produto_id,))
+            cur.execute(
+                "SELECT preco, quantidade FROM produtos WHERE id=%s FOR UPDATE",
+                (item.produto_id,),
+            )
             row = cur.fetchone()
 
             if not row:
-                raise ValueError(f"Produto {item.produto_id} não encontrado.")
+                raise ValueError(f"Produto {item.produto_id} nao encontrado.")
 
             preco, estoque = float(row[0]), int(row[1])
 
-            if item.quantidade <= 0:
-                raise ValueError("Quantidade inválida.")
-
             if estoque < item.quantidade:
                 raise ValueError(
-                    f"Sem estoque suficiente para o produto {item.produto_id}. Disponível: {estoque}."
+                    f"Sem estoque suficiente para o produto {item.produto_id}. Disponivel: {estoque}."
                 )
 
             subtotal += preco * item.quantidade
@@ -363,7 +421,9 @@ def criar_venda(cliente_id: int, vendedor_id: int, forma: str, status: str, iten
 
         cur.execute(
             """
-            INSERT INTO vendas (cliente_id, vendedor_id, subtotal, desconto, total, forma_pagamento, status_pagamento)
+            INSERT INTO vendas (
+                cliente_id, vendedor_id, subtotal, desconto, total, forma_pagamento, status_pagamento
+            )
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
             (cliente_id, vendedor_id, subtotal, desconto, total, forma, status),
@@ -376,7 +436,9 @@ def criar_venda(cliente_id: int, vendedor_id: int, forma: str, status: str, iten
 
             cur.execute(
                 """
-                INSERT INTO venda_itens (venda_id, produto_id, quantidade, preco_unitario, total_item)
+                INSERT INTO venda_itens (
+                    venda_id, produto_id, quantidade, preco_unitario, total_item
+                )
                 VALUES (%s, %s, %s, %s, %s)
                 """,
                 (venda_id, item.produto_id, item.quantidade, preco, total_item),
@@ -390,6 +452,7 @@ def criar_venda(cliente_id: int, vendedor_id: int, forma: str, status: str, iten
         return venda_id
 
 
+# Lista as vendas registradas conforme o periodo informado.
 def listar_vendas(ano: int | None = None, mes: int | None = None) -> list[dict]:
     where = []
     params = []
@@ -429,6 +492,7 @@ def listar_vendas(ano: int | None = None, mes: int | None = None) -> list[dict]:
         return fetchall_dict(cur)
 
 
+# Retorna os detalhes completos de uma venda especifica.
 def detalhar_venda(venda_id: int) -> dict:
     with conectar() as conn:
         cur = conn.cursor()
@@ -456,7 +520,7 @@ def detalhar_venda(venda_id: int) -> dict:
         venda = fetchone_dict(cur)
 
         if not venda:
-            raise ValueError("Venda não encontrada.")
+            raise ValueError("Venda nao encontrada.")
 
         cur.execute(
             """
@@ -479,6 +543,7 @@ def detalhar_venda(venda_id: int) -> dict:
         return venda
 
 
+# Retorna os produtos com estoque inferior a 5 unidades.
 def estoque_baixo() -> list[dict]:
     with conectar() as conn:
         cur = conn.cursor()
@@ -486,6 +551,7 @@ def estoque_baixo() -> list[dict]:
         return fetchall_dict(cur)
 
 
+# Executa a procedure do relatorio mensal por vendedor.
 def relatorio_mensal_por_vendedor(ano: int, mes: int) -> list[dict]:
     with conectar() as conn:
         cur = conn.cursor()
